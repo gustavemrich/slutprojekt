@@ -2,7 +2,6 @@ require 'sqlite3'
 require 'bcrypt'
 
 module Database
-  # Define the connection as a module-level variable
   @db = nil
 
   module_function
@@ -14,18 +13,17 @@ module Database
   end
 
   def execute(query, *params)
-    connection.execute(query, params)  # Pass params as a single array
+    connection.execute(query, params)  
   end
 
   def execute_query(query, *params)
-    connection.execute(query, params)  # Pass params as a single array
+    connection.execute(query, params) 
   end
 
   def last_insert_row_id
     connection.last_insert_row_id
   end
 
-  # === Brand Operations ===
   def all_brands
     execute_query("SELECT * FROM brands")
   end
@@ -39,7 +37,6 @@ module Database
     { 'id' => last_insert_row_id, 'name' => name }
   end
 
-  # === Car Operations ===
   def all_cars
     execute_query("SELECT * FROM cars")
   end
@@ -69,7 +66,6 @@ module Database
     )
   end
 
-  # === CarPart Operations ===
   def create_car_part(car_id, part_id)
     execute(
       "INSERT INTO car_parts (car_id, part_id) VALUES (?, ?)",
@@ -82,7 +78,6 @@ module Database
     execute_query("SELECT * FROM car_parts")
   end
 
-  # === Part Operations ===
   def create_part(cat_id)
     execute(
       "INSERT INTO parts (cat_id) VALUES (?)",
@@ -99,7 +94,6 @@ module Database
     execute_query("SELECT * FROM parts")
   end
 
-  # === User Operations ===
   def register_user(username, password, password_confirm)
     if password == password_confirm
       pwdigest = BCrypt::Password.create(password)
@@ -109,7 +103,7 @@ module Database
       )
       { 'id' => last_insert_row_id, 'username' => username, 'pwdigest' => pwdigest }
     else
-      nil  # Return nil to indicate failure
+      nil
     end
   end
 
@@ -118,7 +112,7 @@ module Database
     if user && BCrypt::Password.new(user['pwdigest']) == password
       user
     else
-      nil  # Return nil to indicate failure
+      nil
     end
   end
 

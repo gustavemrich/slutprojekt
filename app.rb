@@ -35,9 +35,11 @@ get '/cars' do
   end
 end
 
-get '/cars/new' do
+get '/newcar' do
   @brands = Database.all_brands
-  slim :'cars/new'
+  @form_data = { name: '', price: '', brand_id: '' } unless defined?(@form_data)
+  @errors = [] unless defined?(@errors)
+  slim :newcar
 end
 
 post '/cars' do
@@ -46,19 +48,50 @@ post '/cars' do
   brand_id = params[:brand_id].to_i
   image = params[:image]
 
+  # Validation
+  errors = []
+  if name.nil? || name.strip.empty?
+    errors << "Name is required."
+  end
+  if price <= 0
+    errors << "Price must be greater than 0."
+  end
+  if brand_id <= 0 || Database.find_brand(brand_id).nil?
+    errors << "Please select a valid brand."
+  end
+
   # Handle the uploaded image
   image_path = nil
   if image && image[:tempfile]
-    filename = "#{Time.now.to_i}_#{image[:filename]}"
-    File.open("public/images/#{filename}", 'wb') do |f|
-      f.write(image[:tempfile].read)
+    # Validate image type (optional)
+    unless ['image/png', 'image/jpeg', 'image/jpg'].include?(image[:type])
+      errors << "Image must be a PNG, JPEG, or JPG file."
+    else
+      filename = "#{Time.now.to_i}_#{image[:filename]}"
+      File.open("public/images/#{filename}", 'wb') do |f|
+        f.write(image[:tempfile].read)
+      end
+      image_path = filename
     end
-    image_path = filename
   end
 
-  # Create the car
-  Database.create_car(name, price, brand_id, image_path)
-  redirect '/cars'
+  if errors.empty?
+    # Create the car
+    car = Database.create_car(name, price, brand_id, image_path)
+    if car
+      redirect '/cars'
+    else
+      @errors = ["Failed to create car. Please try again."]
+      @brands = Database.all_brands
+      @form_data = { name: name, price: price, brand_id: brand_id }
+      slim :newcar
+    end
+  else
+    @errors = errors
+    @brands = Database.all_brands
+    @form_data = { name: name, price: price, brand_id: brand_id }
+    slim :newcar
+  end
 end
 
 post '/login' do

@@ -3,9 +3,7 @@ source 'https://rubygems.org'
 gem 'sinatra'
 gem 'slim'
 gem 'sqlite3'
-gem 'activerecord'
+gem 'yard'
+gem 'yard-sinatra'
 gem 'sinatra-reloader'
 gem 'bcrypt'
-gem 'sinatra-activerecord'
-gem 'rackup'  # Add this line
-gem 'puma'    # Add this line
