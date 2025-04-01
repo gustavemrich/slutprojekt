@@ -1,0 +1,18 @@
+h1 Car Details
+h2 = @car.name
+p
+  strong Price:
+  = @car.price
+p
+  strong Brand:
+  = @car.brand&.name || 'Unknown'
+- if @car.image_path
+  img src="/images/#{@car.image_path}" alt="#{@car.name}" width="200"
+- else
+  p No image available
+h3 Parts
+ul
+  - @car.parts.each do |part|
+    li
+      = part.name
+      |  (Price: #{part.price})
