@@ -1,23 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <header>
-        <h1>Cars</h1>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/register">Register</a></li>
-                <li><a href="/login">login</a></li>
-                <li><a href="/cars">cars</a></li>
-            </ul>
-        </nav>
-    </header>
-    ==yield
-</body>
-</html>
+html lang="en"
+  head
+    meta charset="UTF-8"
+    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    title Car App
+    link rel="stylesheet" href="/css/style.css"
+  body
+    header
+      .header-container
+        h1 Cars
+        - if logged_in?
+          .user-info
+            span Welcome, #{session[:username]}!
+            a href="/logout" Logout
+      nav
+        ul
+          li
+            a href="/" Home
+          - if logged_in?
+            li
+              a href="/cars" Cars
+            li
+              a href="/newcar" Add a New Car
+            - if admin?
+              li
+                a href="/admin/users" Manage Users
+          - else
+            li
+              a href="/register" Register
+            li
+              a href="/login" Login
+    - if @error
+      .error-message = @error
+    == yield

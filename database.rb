@@ -45,12 +45,12 @@ module Database
     execute_query("SELECT * FROM cars WHERE id = ?", id).first
   end
 
-  def create_car(name, price, brand_id, image_path)
+  def create_car(name, price, brand_id, image_path, user_id)
     execute(
-      "INSERT INTO cars (name, price, brand_id, image_path) VALUES (?, ?, ?, ?)",
-      name, price, brand_id, image_path
+      "INSERT INTO cars (name, price, brand_id, image_path, user_id) VALUES (?, ?, ?, ?, ?)",
+      name, price, brand_id, image_path, user_id
     )
-    { 'id' => last_insert_row_id, 'name' => name, 'price' => price, 'brand_id' => brand_id, 'image_path' => image_path }
+    { 'id' => last_insert_row_id, 'name' => name, 'price' => price, 'brand_id' => brand_id, 'image_path' => image_path, 'user_id' => user_id }
   end
 
   def car_brand(car)
@@ -98,10 +98,10 @@ module Database
     if password == password_confirm
       pwdigest = BCrypt::Password.create(password)
       execute(
-        "INSERT INTO users (username, pwdigest) VALUES (?, ?)",
-        username, pwdigest
+        "INSERT INTO users (username, pwdigest, admin) VALUES (?, ?, ?)",
+        username, pwdigest, 0  # Default to non-admin
       )
-      { 'id' => last_insert_row_id, 'username' => username, 'pwdigest' => pwdigest }
+      { 'id' => last_insert_row_id, 'username' => username, 'pwdigest' => pwdigest, 'admin' => 0 }
     else
       nil
     end
@@ -120,7 +120,18 @@ module Database
     execute_query("SELECT * FROM users")
   end
 
-  # === Clear Database ===
+  def find_user(id)
+    execute_query("SELECT * FROM users WHERE id = ?", id).first
+  end
+
+  def delete_user(id)
+    execute("DELETE FROM users WHERE id = ?", id)
+  end
+
+  def update_user_admin(id, admin_status)
+    execute("UPDATE users SET admin = ? WHERE id = ?", admin_status, id)
+  end
+
   def clear_all
     execute("DELETE FROM brands")
     execute("DELETE FROM cars")

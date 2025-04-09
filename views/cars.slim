@@ -3,11 +3,10 @@ ul
   - @cars.each do |car|
     li
       a href="/cars/#{car['id']}" = car['name']
-      |  (Price: #{car['price']}, Brand: #{Database.car_brand(car)&.fetch('name', 'Unknown')})
+      p
+        | Price: #{car['price']}, Brand: #{Database.car_brand(car)&.fetch('name', 'Unknown')}, Owner: #{Database.find_user(car['user_id'])&.fetch('username', 'Unknown')}
       br
       - if car['image_path']
         img src="/images/#{car['image_path']}" alt="#{car['name']}" width="100"
       - else
         | No image available
-p
-  a href="/newcar" Add a New Car

@@ -8,10 +8,14 @@ p
   = Database.car_brand(@car)&.fetch('name', 'Unknown')
 - if @car['image_path']
   img src="/images/#{@car['image_path']}" alt="#{@car['name']}" width="200"
+
 - else
   p No image available
+p 
+  strong Owner:
+  = Database.find_user(@car['user_id'])&.fetch('username', 'Unknown')
 h3 Parts
 ul
   - Database.car_parts(@car).each do |part|
     li
-      | Category ID: #{part['cat_id']}
+    p Category ID: #{part['cat_id']}

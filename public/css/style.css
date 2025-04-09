@@ -1,10 +1,109 @@
-body{
-    background-color: aquamarine;
-}
-
-.error-messages {
-    color: red;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #7d7d7d;
+  }
+  
+  header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  h1 {
+    margin: 0;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .user-info span {
+    font-size: 1.1em;
+  }
+  
+  .user-info a {
+    color: #ffd700;
+    text-decoration: none;
+  }
+  
+  .user-info a:hover {
+    text-decoration: underline;
+  }
+  
+  nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+    margin: 10px 0 0 0;
+  }
+  
+  nav ul li {
+    display: inline;
+  }
+  
+  nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+  }
+  
+  nav ul li a:hover {
+    color: #ffd700;
+  }
+  
+  .flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 20px;
+    margin: 10px 20px;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+  }
+  
+  .flash-error, .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px 20px;
+    margin: 10px 20px;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+  }
+  
+  .error-messages {
+    color: #721c24;
     list-style-type: disc;
-    margin: 10px 0;
+    margin: 10px 20px;
     padding-left: 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  form {
+    display: inline;
+    margin-right: 10px;
   }

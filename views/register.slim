@@ -1,5 +1,15 @@
-form action="users/new" method="post" 
-    input# type="text" name="username" placeholder="Enter Username"/
-    input# type="password" name="password" placeholder="Enter Password"/
-    input type="password" name="password_confirm" placeholder="Enter Password Again"/
-    input type="submit" value="Register"/
+h1 Register
+- if @error
+  p.error-message = @error
+form action="/users" method="post"
+  p
+    label for="username" Username:
+    input type="text" name="username" required=true
+  p
+    label for="password" Password:
+    input type="password" name="password" required=true
+  p
+    label for="password_confirm" Confirm Password:
+    input type="password" name="password_confirm" required=true
+  p
+    input type="submit" value="Register"

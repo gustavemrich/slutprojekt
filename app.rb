@@ -6,9 +6,37 @@ require_relative 'database'
 enable :sessions
 set :public_folder, 'public'
 
-# Routes
+helpers do
+  def logged_in?
+    !session[:id].nil?
+  end
+
+  def current_user
+    if session[:id]
+      user = Database.login_user(session[:username], session[:password])
+      user if user && user['id'] == session[:id]
+    end
+  end
+
+  def admin?
+    user = current_user
+    user && user['admin'] == 1
+  end
+end
+
+UNPROTECTED_ROUTES = ['/', '/login', '/register', '/users']
+
+before do
+  pass if UNPROTECTED_ROUTES.include?(request.path_info)
+  redirect '/login' unless logged_in?
+end
+
+before '/admin/*' do
+  redirect '/cars' unless admin?
+end
+
 get '/cars/:id' do
-  @car = Database.find_car(params[:id])
+  @car = Database.find_car(params[:id].to_i)
   halt 404, "Car not found" unless @car
   slim :car_details
 end
@@ -25,20 +53,24 @@ get '/login' do
   slim :login
 end
 
+get '/logout' do
+  session.clear
+  redirect '/login'
+end
+
 get '/cars' do
   begin
     @cars = Database.all_cars
     slim :cars
   rescue SQLite3::BusyException => e
-    @error = "The database is currently busy. Please try again later."
-    slim :error
+    flash[:error] = "The database is currently busy. Please try again later."
+    redirect '/cars'
   end
 end
 
 get '/newcar' do
   @brands = Database.all_brands
-  @form_data = { name: '', price: '', brand_id: '' } unless defined?(@form_data)
-  @errors = [] unless defined?(@errors)
+  @form_data = { name: '', price: '', brand_id: '' }
   slim :newcar
 end
 
@@ -48,9 +80,8 @@ post '/cars' do
   brand_id = params[:brand_id].to_i
   image = params[:image]
 
-  # Validation
   errors = []
-  if name.nil? || name.strip.empty?
+  if name.nil?
     errors << "Name is required."
   end
   if price <= 0
@@ -60,10 +91,8 @@ post '/cars' do
     errors << "Please select a valid brand."
   end
 
-  # Handle the uploaded image
   image_path = nil
   if image && image[:tempfile]
-    # Validate image type (optional)
     unless ['image/png', 'image/jpeg', 'image/jpg'].include?(image[:type])
       errors << "Image must be a PNG, JPEG, or JPG file."
     else
@@ -76,8 +105,7 @@ post '/cars' do
   end
 
   if errors.empty?
-    # Create the car
-    car = Database.create_car(name, price, brand_id, image_path)
+    car = Database.create_car(name, price, brand_id, image_path, session[:id])
     if car
       redirect '/cars'
     else
@@ -100,10 +128,12 @@ post '/login' do
   user = Database.login_user(username, password)
   if user
     session[:id] = user['id']
-    @username = username
-    redirect '/logged_in'
+    session[:username] = username
+    session[:password] = password
+    redirect '/cars'
   else
-    "fel användarnamn eller lösenord"
+    @error = "Fel användarnamn eller lösenord"
+    slim :login
   end
 end
 
@@ -112,14 +142,39 @@ post '/users' do
   password = params[:password]
   password_confirm = params[:password_confirm]
 
-  puts "username: #{username}"
-  puts "password: #{password}"
-  puts "password_confirm: #{password_confirm}"
-
   user = Database.register_user(username, password, password_confirm)
   if user
-    redirect '/'
+    session[:id] = user['id']
+    session[:username] = username
+    session[:password] = password
+    redirect '/cars'
   else
-    "lösenorden matchar inte"
+    @error = "Lösenorden matchar inte"
+    slim :register
   end
+end
+
+get '/admin/users' do
+  @users = Database.all_users
+  slim :admin_users
+end
+
+post '/admin/users/:id/delete' do
+  user_id = params[:id].to_i
+  if user_id == session[:id]
+    @error = "You cannot delete yourself."
+  else
+    Database.delete_user(user_id)
+  end
+  redirect '/admin/users'
+end
+
+post '/admin/users/:id/toggle_admin' do
+  user_id = params[:id].to_i
+  user = Database.find_user(user_id)
+  if user
+    new_admin_status = user['admin'] == 1 ? 0 : 1
+    Database.update_user_admin(user_id, new_admin_status)
+  end
+  redirect '/admin/users'
 end
